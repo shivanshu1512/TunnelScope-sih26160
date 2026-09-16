@@ -1,0 +1,95 @@
+{
+  "project": "TunnelScope / SIH26160",
+  "generated_utc": "2026-09-15T20:45:52+00:00",
+  "seed": 42,
+  "data": {
+    "train_rows": 9000,
+    "test_rows": 1200,
+    "maturity": "SYNTHETIC VALIDATION \u2014 generated data, not live capture",
+    "risk_bands_overlap": true,
+    "note": "risk_score carries deliberate Gaussian noise (sd 0.55) so the verdict bands overlap; a non-zero MAE floor is by construction"
+  },
+  "selection": {
+    "protocol": "RepeatedStratifiedKFold 5x5, shared folds across all candidates, preprocessing fitted inside each fold",
+    "ranked_by": "mean minus one std (conservative floor)",
+    "candidates_evaluated": 54,
+    "evidence": "stage1_results.csv"
+  },
+  "architecture_evidence": {
+    "behaviour_to_traffic_type": 0.948,
+    "behaviour_to_security_verdict": 0.331,
+    "security_verdict_majority_baseline": 0.394,
+    "behaviour_to_risk_score_r2": -0.048,
+    "reading": "behaviour features carry no security signal, measured in both directions; the deterministic and ML planes are separate by evidence, not by assertion"
+  },
+  "models": {
+    "traffic_classifier": {
+      "algorithm": "GradientBoostingClassifier",
+      "features": [
+        "avg_packet_size_bytes",
+        "packet_rate_per_sec",
+        "session_duration_sec",
+        "burstiness_index",
+        "ike_handshake_time_ms"
+      ],
+      "test_f1_macro": 0.9418,
+      "test_accuracy": 0.9408,
+      "n_classes": 8,
+      "limits": [
+        "config features deliberately excluded \u2014 also unusable on ESP-only flows where IKE was never observed",
+        "top confusions are behaviourally adjacent: dns_query/icmp, email/web_browsing, video_streaming/file_transfer",
+        "voip recall of 1.000 on training data is a generator artefact and must not be quoted as a capability"
+      ]
+    },
+    "security_classifier": {
+      "algorithm": "DecisionTreeClassifier",
+      "features": [
+        "mode",
+        "encryption_algo",
+        "dh_group",
+        "pfs",
+        "ip_version"
+      ],
+      "test_f1_macro": 0.8931,
+      "test_accuracy": 0.8908,
+      "n_classes": 3,
+      "limits": [
+        "24.8% of training rows sit in config combinations carrying more than one verdict \u2014 100% is unreachable by construction",
+        "the rules engine owns the authoritative verdict; this model is parallel evidence, never the decision",
+        "a single tree matched an 18-candidate field within one standard deviation, so it was chosen for interpretability"
+      ]
+    },
+    "risk_regressor": {
+      "algorithm": "GradientBoostingRegressor",
+      "features": [
+        "mode",
+        "encryption_algo",
+        "dh_group",
+        "pfs",
+        "ip_version"
+      ],
+      "test_mae": 1.0214,
+      "test_r2": 0.7916,
+      "limits": [
+        "HistGradientBoosting scored better (MAE 1.0023 vs 1.0399) but has no working skl2onnx converter \u2014 rejected on deployability, not accuracy",
+        "MAE is bounded below by the deliberate target noise"
+      ]
+    }
+  },
+  "onnx": {
+    "exported": true,
+    "opset": 17,
+    "zipmap": false,
+    "sizes_bytes": {
+      "traffic_classifier": 452388,
+      "security_classifier": 16471,
+      "risk_regressor": 56605
+    },
+    "input_contract": "each feature is its own named [N,1] input, not a single [N,k] tensor",
+    "dtypes": "traffic_classifier all tensor(float); security_classifier and risk_regressor all tensor(string)",
+    "outputs": "classifiers -> label, probabilities; regressor -> variable"
+  },
+  "not_quotable": [
+    "demo_weak / demo_strong accuracy (1.000) \u2014 extreme configs only, no Medium rows present, this is a demo not an evaluation"
+  ]
+}

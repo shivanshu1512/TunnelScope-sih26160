@@ -1,0 +1,40 @@
+|--- cat__dh_group_modp768(1) <= 0.50
+|   |--- cat__dh_group_modp1024(2) <= 0.50
+|   |   |--- cat__dh_group_modp1536(5) <= 0.50
+|   |   |   |--- cat__encryption_algo_AES-256-GCM <= 0.50
+|   |   |   |   |--- class: Medium
+|   |   |   |--- cat__encryption_algo_AES-256-GCM >  0.50
+|   |   |   |   |--- class: Strong
+|   |   |--- cat__dh_group_modp1536(5) >  0.50
+|   |   |   |--- cat__encryption_algo_AES-256-GCM <= 0.50
+|   |   |   |   |--- class: Weak
+|   |   |   |--- cat__encryption_algo_AES-256-GCM >  0.50
+|   |   |   |   |--- class: Medium
+|   |--- cat__dh_group_modp1024(2) >  0.50
+|   |   |--- cat__encryption_algo_AES-256-GCM <= 0.50
+|   |   |   |--- cat__encryption_algo_AES-256 <= 0.50
+|   |   |   |   |--- class: Weak
+|   |   |   |--- cat__encryption_algo_AES-256 >  0.50
+|   |   |   |   |--- class: Medium
+|   |   |--- cat__encryption_algo_AES-256-GCM >  0.50
+|   |   |   |--- class: Medium
+|--- cat__dh_group_modp768(1) >  0.50
+|   |--- cat__encryption_algo_AES-256-GCM <= 0.50
+|   |   |--- cat__encryption_algo_AES-256 <= 0.50
+|   |   |   |--- class: Weak
+|   |   |--- cat__encryption_algo_AES-256 >  0.50
+|   |   |   |--- cat__pfs_On <= 0.50
+|   |   |   |   |--- class: Weak
+|   |   |   |--- cat__pfs_On >  0.50
+|   |   |   |   |--- class: Medium
+|   |--- cat__encryption_algo_AES-256-GCM >  0.50
+|   |   |--- cat__pfs_Off <= 0.50
+|   |   |   |--- cat__mode_Transport <= 0.50
+|   |   |   |   |--- class: Medium
+|   |   |   |--- cat__mode_Transport >  0.50
+|   |   |   |   |--- class: Medium
+|   |   |--- cat__pfs_Off >  0.50
+|   |   |   |--- cat__mode_Tunnel <= 0.50
+|   |   |   |   |--- class: Medium
+|   |   |   |--- cat__mode_Tunnel >  0.50
+|   |   |   |   |--- class: Medium
